@@ -1,7 +1,14 @@
 export default {
-    'GET /api/user': {
-        username: 'admin',
-        sex: 5,
+    'GET /api/currentUser': function (req, res) {
+        const query = req.query || {};
+        return res.json({
+            success: true,
+            data: {
+                name: 'Mr Zhang',
+                avatar: 'https://gw.alipayobjects.com/zos/antfincdn/XAosXuNZyF/BiazfanxmamNRoxxVxka.png',
+                userid: '00000001',
+            }
+        })
     },
     'GET /api/list': function (req, res) {
         const query = req.query || {};
