@@ -30,29 +30,18 @@ GC.Spread.Sheets.LicenseKey = SPREADJS_KEY;
 let $spread: GC.Spread.Sheets.Workbook;
 export default Vue.extend({
   name: "GcSpreadSheets",
-  props: {
-    dataSource: {
-      type: Array,
-      default() {
-        return [];
-      }
-    }
-  },
   data() {
     return {
       activeSheetIndex: 0
     };
   },
-  watch: {
-    dataSource(val) {
-      const sheet = $spread.getActiveSheet();
-      sheet.tables.addFromDataSource("table1", 0, 0, val, GC.Spread.Sheets.Tables.TableThemes.medium2);
-    }
-  },
   mounted() {
     this.initSpread()
   },
   methods: {
+    /**
+     * 初始化SpreadJS
+     */
     initSpread() {
       $spread = new GC.Spread.Sheets.Workbook(this.$refs.spreadRef as HTMLElement, {
         scrollByPixel: true,
@@ -62,10 +51,16 @@ export default Vue.extend({
       this.initStatusBar();
       this.initEvents();
     },
+    /**
+     * 初始化状态栏
+     */
     initStatusBar() {
       const statusBar = new GC.Spread.Sheets.StatusBar.StatusBar(this.$refs.statusBar as HTMLElement);
       statusBar.bind($spread);
     },
+    /**
+     * 初始化绑定事件
+     */
     initEvents() {
       // 当用户在单元格中按下鼠标左键时发生
       $spread.bind(GC.Spread.Sheets.Events.CellClick, function (sender: any, args: GC.Spread.Sheets.ICellsInfo) {
