@@ -24,6 +24,12 @@ const routes: Array<RouteConfig> = [
         // which is lazy-loaded when the route is visited.
         component: () =>
           import(/* webpackChunkName: "about" */ "../views/About.vue")
+      },
+      {
+        path: "report-forms",
+        name: "ReportForms",
+        component: () =>
+          import(/* webpackChunkName: "report-forms" */ "../views/ReportForms.vue")
       }
     ]
   }

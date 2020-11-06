@@ -5,14 +5,14 @@ export async function queryCurrentUser() {
 }
 
 export async function login(data: any) {
-    return request("/users/login", {
-      method: "post",
-      data,
-    });
-  }
+  return request("/users/login", {
+    method: "post",
+    data,
+  });
+}
   
-  export async function logout() {
-    return request("/users/logout", {
-      method: "post",
-    });
-  }
+export async function logout() {
+  return request("/users/logout", {
+    method: "post",
+  });
+}

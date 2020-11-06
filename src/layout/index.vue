@@ -12,8 +12,9 @@
 
         <el-col :md="16">
           <el-menu mode="horizontal" background-color="#000730" :default-active="$route.path" text-color="#ffffff" active-text-color="#409EFF" router>
-            <el-menu-item index="/index">Home</el-menu-item>
-            <el-menu-item index="/about">About</el-menu-item>
+            <el-menu-item index="/index">首页</el-menu-item>
+            <el-menu-item index="/about">关于</el-menu-item>
+            <el-menu-item index="/report-forms">报表</el-menu-item>
           </el-menu>
         </el-col>
 
