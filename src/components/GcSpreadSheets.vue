@@ -1,14 +1,5 @@
 <template>
-  <div class="spread-container">
-    <!-- 
-      <gc-spread-sheets
-      class="spreadsheets"
-      :name="name"
-      @workbookInitialized="initSpread"
-      :scrollByPixel="true"
-      :scrollbarMaxAlign="true"
-      ></gc-spread-sheets>
-    -->
+  <div class="spread-wrapper">
     <div class="spreadsheets" ref="spreadRef"></div>
     <div class="status-bar" ref="statusBar"></div>
   </div>
@@ -28,6 +19,7 @@ GC.Spread.Sheets.LicenseKey = SPREADJS_KEY;
 // 您需要使用相同的许可证密钥单独许可ExcelIO模块
 // spreadExcel.LicenseKey = SPREADJS_KEY;
 let $spread: GC.Spread.Sheets.Workbook;
+
 export default Vue.extend({
   name: "GcSpreadSheets",
   data() {
@@ -63,21 +55,39 @@ export default Vue.extend({
      */
     initEvents() {
       // 当用户在单元格中按下鼠标左键时发生
-      $spread.bind(GC.Spread.Sheets.Events.CellClick, function (sender: any, args: GC.Spread.Sheets.ICellsInfo) {
+      $spread.bind(GC.Spread.Sheets.Events.CellClick,  (sender: any, args: GC.Spread.Sheets.ICellsInfo) =>{
         const sheet = $spread.getActiveSheet()
         const formula = sheet.getFormula(args.row, args.col);
-        console.log(formula)
+        const a = this.getTableActiveIndex($spread);
+        console.log(a)
       });
       // 表单当选择区域发生变化
       $spread.bind(GC.Spread.Sheets.Events.SelectionChanged, (sender: any, args: GC.Spread.Sheets.ISelectionChangedEventArgs) => {
         // 获取选择区域
         const range: GC.Spread.Sheets.Range = args.newSelections[0];
-        const lockedArr = this.getRangeLocked(range, args.sheet);
-        console.log(lockedArr)
+        const lockedArr = this.getRangeLockedValue(range, args.sheet);
+        // console.log(lockedArr)
       });
     },
+    // 获取活动单元格基于表格索引
+    getTableActiveIndex(spread: GC.Spread.Sheets.Workbook): any{
+      
+      const sheet = spread.getActiveSheet();
+      const sheetActiveRowIndex = sheet.getActiveRowIndex();
+      const sheetActiveColumnIndex = sheet.getActiveColumnIndex();
+      const table = sheet.tables.find(sheetActiveRowIndex, sheetActiveColumnIndex);
+      const tableRange = table.range();
+      const showHeader = table.showHeader();
+      const tableEndRow = tableRange.row + tableRange.rowCount ;
+      const tableEndCol = tableRange.col + tableRange.colCount;
+      const position = {
+        row: tableRange.rowCount - (tableEndRow - sheetActiveRowIndex) -1,
+        col: tableRange.colCount - (tableEndCol - sheetActiveColumnIndex)
+      }
+      return position;
+    },
     // 获取选择区域锁定单元格的值
-    getRangeLocked(range: GC.Spread.Sheets.Range, sheet: GC.Spread.Sheets.Worksheet) {
+    getRangeLockedValue(range: GC.Spread.Sheets.Range, sheet: GC.Spread.Sheets.Worksheet) {
       const lockedArr = [];
       for (let r = 0; r < range.rowCount; r++) {
         for (let c = 0; c < range.colCount; c++) {
@@ -87,8 +97,28 @@ export default Vue.extend({
             const val = sheet.getCell(range.row + r, range.col + c).value()
             lockedArr.push({
               row: range.row + r,
-              col: range.col + r,
+              col: range.col + c,
               value: val
+            })
+          }
+        }
+      }
+      return lockedArr;
+    },
+    // 获取选择区域锁定单元格的公式
+    getRangeLockedFormula(range: GC.Spread.Sheets.Range, sheet: GC.Spread.Sheets.Worksheet) {
+      const lockedArr = [];
+      for (let r = 0; r < range.rowCount; r++) {
+        for (let c = 0; c < range.colCount; c++) {
+          // 获取单元格是否锁定且单元格中是否有公式，true则保存单元格位置与公式
+          const isLocked = sheet.getRange(range.row + r, range.col + c).locked();
+          const formulaInfo: GC.Spread.Sheets.IFormulaInfo = sheet.getFormulaInformation(range.row + r, range.col + c)
+          if (isLocked && formulaInfo.hasFormula) {
+            const val = sheet.getCell(range.row + r, range.col + c).value()
+            lockedArr.push({
+              row: range.row + r,
+              col: range.col + c,
+              value: formulaInfo.formula
             })
           }
         }
@@ -142,13 +172,15 @@ export default Vue.extend({
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="scss">
 @import "~@grapecity/spread-sheets/styles/gc.spread.sheets.excel2013white.css";
-.spread-container {
+.spread-wrapper {
   width: 100%;
   height: 100%;
   .spreadsheets {
     position: relative;
     width: 100%;
     height: calc(100% - 30px);
+    border: 1px solid rgb(246, 246, 246);
+    box-sizing: border-box;
   }
   .status-bar {
     width: 100%;
