@@ -35,7 +35,9 @@
       </el-row>
     </el-header>
     <el-main>
+      <br>
       <router-view />
+      <br>
     </el-main>
   </el-container>
 </template>

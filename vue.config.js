@@ -7,7 +7,7 @@ module.exports = {
       }
     }
   },
-  // devServer: https://webpack.js.org/configuration/dev-server/
+  // devServer: https://webpack.docschina.org/configuration/dev-server/
   devServer: {
     overlay: {
       warnings: false,
