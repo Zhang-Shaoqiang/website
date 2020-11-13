@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-var-requires */
+const proxy = require("./proxy.ts");
 // https://cli.vuejs.org/zh/config/
 module.exports = {
   pages: {
@@ -35,6 +37,7 @@ module.exports = {
     overlay: {
       warnings: false,
       errors: false
-    }
+    },
+    proxy: proxy[process.env.VUE_APP_ENV || "dev"]
   }
 }
