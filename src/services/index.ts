@@ -1,7 +1,10 @@
 import request from "@/utils/request";
 
-export async function queryUserList() {
-    return request(`/api/list`);
+export async function queryUserList(params: any) {
+    return request(`/api/list`, {
+        cache: true,
+        params: params
+    });
 }
 
 export async function accountLogin(data: any) {

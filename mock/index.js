@@ -20,21 +20,25 @@ export default {
                     username: "张三",
                     address: '北京',
                     date: "1993-12-03",
+                    type: query.a
                 },
                 {
                     username: "李四",
                     address: '上海',
                     date: "1993-12-03",
+                    type: query.a
                 },
                 {
                     username: "王五",
                     address: '广东',
                     date: "1993-12-03",
+                    type: query.a
                 },
                 {
                     username: "马六",
                     address: '深圳',
                     date: "1993-12-03",
+                    type: query.a
                 },
             ],
         });

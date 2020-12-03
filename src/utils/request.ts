@@ -5,10 +5,35 @@ import router from '@/router';
 // API 请求的默认前缀
 axios.defaults.baseURL = process.env.VUE_APP_BASE_API;
 
+interface CachesType {
+  [key: string]: any;
+}
+// 定义一个缓存池用来缓存数据
+const CACHES: CachesType = {}
+const EXPIRE_TIME = 60000
+
+// 利用axios的cancelToken来取消请求
+const CancelToken = axios.CancelToken
+interface MyConfig extends AxiosRequestConfig {
+  cache?: boolean;
+}
 // 添加请求拦截器
 axios.interceptors.request.use(
-  function (config) {
-    // 在发送请求之前做些什么
+  function (config: MyConfig) {
+    // 如果需要缓存--考虑到并不是所有接口都需要缓存的情况
+    if (config.cache) {
+      const source = CancelToken.source()
+      config.cancelToken = source.token
+      // 去缓存池获取缓存数据
+      const data = CACHES[`${config.url + JSON.stringify(config.params)}`]
+      // 获取当前时间戳
+      const expireTime = new Date().getTime()
+      // 判断缓存池中是否存在已有数据 存在的话 再判断是否过期
+      // 未过期 source.cancel会取消当前的请求 并将内容返回到拦截器的err中
+      if (data) {
+        source.cancel(data)
+      }
+    }
     return config;
   },
   function (error) {
@@ -39,11 +64,25 @@ const codeMessage = {
 // 添加响应拦截器
 axios.interceptors.response.use(
   function (response: AxiosResponse) {
-    // 对响应数据做点什么
+    // 只缓存get请求
+    const config: MyConfig = response.config;
+    if (config.cache) {
+      // 缓存数据 并将当前时间存入 方便之后判断是否过期
+      const data = {
+        expire: new Date().getTime(),
+        data: response.data
+      }
+      CACHES[`${config.url + JSON.stringify(config.params)}`] = data;
+    }
     return response;
   },
+
   function (error: AxiosError) {
     // 对响应错误做点什么
+    // 请求拦截器中的source.cancel会将内容发送到error中
+    if (axios.isCancel(error)) return Promise.resolve(error.message)
+
+    // 如果没有的话 则是正常的接口错误 直接返回错误信息给用户
     const { config, response } = error;
     if (response && response.status) {
       const errorText = (codeMessage as any)[response.status] || response.statusText;
@@ -65,6 +104,7 @@ axios.interceptors.response.use(
 );
 
 
+
 const showErrorMessage = (showType: number, errorMessage: string) => {
   switch (showType) {
     case 0:
@@ -76,7 +116,7 @@ const showErrorMessage = (showType: number, errorMessage: string) => {
       Message.error(errorMessage);
       break;
     case 4:
-      Notification.error({ title: '网络异常',message: errorMessage });
+      Notification.error({ title: '网络异常', message: errorMessage });
       break;
     default:
       break;
@@ -93,7 +133,7 @@ export interface RequestResponse {
 }
 
 // 封装request方法
-async function request(url: string, options?: AxiosRequestConfig): Promise<RequestResponse> {
+async function request(url: string, options?: MyConfig): Promise<RequestResponse> {
   const { data } = await axios(url, options);
   if (data && data.success) {
     return data;
