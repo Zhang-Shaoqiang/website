@@ -1,6 +1,6 @@
 import { Module } from 'vuex'
 import * as types from '@/store/mutation-types'
-import { queryCurrentUser } from '@/api/user'
+import { queryCurrentUser } from '@/services/user'
 
 const user: Module<any, any> = {
     namespaced: true,
